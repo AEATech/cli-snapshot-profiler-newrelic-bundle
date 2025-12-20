@@ -1,0 +1,22 @@
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    AEATech\SnapshotProfilerNewrelic\:
+        resource: '../vendor/aeatech/snapshot-profiler-newrelic/src/AEATech/SnapshotProfilerNewrelic'
+
+    AEATech\SnapshotProfiler\:
+        resource: '../vendor/aeatech/snapshot-profiler/src/AEATech/SnapshotProfiler'
+
+    AEATech\CLISnapshotProfilerEventSubscriber\:
+        resource: '../vendor/aeatech/cli-snapshot-profiler-event-subscriber/src/AEATech/CLISnapshotProfilerEventSubscriber'
+
+    AEATech\SnapshotProfilerContracts\ProfilerInterface: '@AEATech\SnapshotProfiler\Profiler'
+    AEATech\SnapshotProfilerContracts\FilterInterface: '@AEATech\SnapshotProfilerNewrelic\Filter'
+    AEATech\SnapshotProfilerContracts\SaverInterface: '@AEATech\SnapshotProfilerNewrelic\Saver'
+    AEATech\SnapshotProfilerContracts\AdapterInterface: '@AEATech\SnapshotProfilerNewrelic\Adapter'
+
+    AEATech\CLISnapshotProfilerNewrelicBundle\:
+        resource: '../src'

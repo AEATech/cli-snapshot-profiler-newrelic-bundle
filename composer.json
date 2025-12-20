@@ -1,0 +1,44 @@
+{
+  "name": "aeatech/cli-snapshot-profiler-newrelic-bundle",
+  "description": "CLI snapshot profiler newrelic bundle for symfony (production ready)",
+  "type": "symfony-bundle",
+  "keywords": ["aeatech", "cli", "snapshot", "profiler", "newrelic", "bundle"],
+  "license": "MIT",
+  "config": {
+    "sort-packages": true
+  },
+  "require": {
+    "php": ">=8.2",
+    "ext-newrelic": "*",
+    "aeatech/snapshot-profiler-newrelic": "^1.0",
+    "aeatech/cli-snapshot-profiler-event-subscriber": "^1.0",
+    "symfony/framework-bundle": "^6.4 || ^7.4",
+    "symfony/yaml": "^6.4 || ^7.4"
+  },
+  "require-dev": {
+    "mockery/mockery": "^1.6",
+    "nyholm/symfony-bundle-test": "^3.1",
+    "phpunit/phpunit": "^11.5",
+    "roave/security-advisories": "dev-master",
+    "symfony/test-pack": "^1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "AEATech\\CLISnapshotProfilerNewrelicBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AEATech\\Tests\\": "tests/"
+    }
+  },
+  "archive": {
+    "exclude": [
+      "/.build",
+      "/.github",
+      "/docker",
+      "/tests",
+      "/phpunit.xml"
+    ]
+  }
+}

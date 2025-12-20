@@ -1,0 +1,46 @@
+services:
+  daemon:
+    image: newrelic/php-daemon:12.1.0
+    command: /usr/bin/newrelic-daemon --address=daemon:31339  --watchdog-foreground --loglevel debug
+  php-cli-8.2:
+    build:
+      context: 8.2/
+      args:
+        OWNER_USER: ${USER}
+        OWNER_USER_ID: 1000
+        NEW_RELIC_AGENT_VERSION: 12.1.0.26
+        NEW_RELIC_DAEMON_ADDRESS: 'daemon:31339'
+    command: php -r "while (true) { sleep(86400); }"
+    working_dir: /app
+    volumes:
+      - ../../cli-snapshot-profiler-newrelic-bundle:/app:rw
+    depends_on:
+      - daemon
+  php-cli-8.3:
+    build:
+      context: 8.3/
+      args:
+        OWNER_USER: ${USER}
+        OWNER_USER_ID: 1000
+        NEW_RELIC_AGENT_VERSION: 12.1.0.26
+        NEW_RELIC_DAEMON_ADDRESS: 'daemon:31339'
+    command: php -r "while (true) { sleep(86400); }"
+    working_dir: /app
+    volumes:
+      - ../../cli-snapshot-profiler-newrelic-bundle:/app:rw
+    depends_on:
+      - daemon
+  php-cli-8.4:
+    build:
+      context: 8.4/
+      args:
+        OWNER_USER: ${USER}
+        OWNER_USER_ID: 1000
+        NEW_RELIC_AGENT_VERSION: 12.1.0.26
+        NEW_RELIC_DAEMON_ADDRESS: 'daemon:31339'
+    command: php -r "while (true) { sleep(86400); }"
+    working_dir: /app
+    volumes:
+      - ../../cli-snapshot-profiler-newrelic-bundle:/app:rw
+    depends_on:
+      - daemon

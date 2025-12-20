@@ -1,0 +1,24 @@
+aea_tech_cli_snapshot_profiler_newrelic:
+    is_profiling_enabled: true
+
+    ###
+    # newrelic configuration
+    ###
+    newrelic:
+        app_name: 'test'
+        license: 'license key'
+
+    ###
+    # Event matched configuration - START
+    ###
+    event_matcher:
+        is_profile_all_commands: true
+
+        # Enable profile by command name (\AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\CommandEventMatcher)
+        command:
+            is_enabled: true
+            name_list:
+                - 'app:command'
+    ###
+    # Event matched configuration - END
+    ###

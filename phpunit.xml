@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         stopOnFailure="false"
+         beStrictAboutTestsThatDoNotTestAnything="false"
+         cacheResult="false"
+         bootstrap="tests/bootstrap.php"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.0/phpunit.xsd">
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </source>
+    <testsuites>
+        <testsuite name="Main Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <coverage includeUncoveredFiles="true">
+        <report>
+            <clover outputFile=".build/clover.xml" />
+        </report>
+    </coverage>
+    <php>
+        <env name="SHELL_VERBOSITY" value="1" force="true"/>
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
+    </php>
+</phpunit>

@@ -1,0 +1,49 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: php-actions/composer@v6
+        with:
+          args: --ignore-platform-reqs
+
+      - name: Run phpunit on php-8.2
+        uses: php-actions/phpunit@v4
+        env:
+          XDEBUG_MODE: coverage
+        with:
+          php_version: 8.2.29
+          php_extensions: "xdebug"
+          configuration: phpunit.xml
+
+      - name: Run phpunit on php-8.3
+        uses: php-actions/phpunit@v4
+        env:
+          XDEBUG_MODE: coverage
+        with:
+          php_version: 8.3.24
+          php_extensions: "xdebug"
+          configuration: phpunit.xml
+
+      - name: Run phpunit on php-8.4
+        uses: php-actions/phpunit@v4
+        env:
+          XDEBUG_MODE: coverage
+        with:
+          php_version: 8.4.11
+          php_extensions: "xdebug"
+          configuration: phpunit.xml
+
+      - name: Code coverage badge
+        uses: timkrase/phpunit-coverage-badge@v1.2.1
+        with:
+          report: ".build/clover.xml"
+          coverage_badge_path: ".build/coverage_badge.svg"
+          push_badge: true
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
