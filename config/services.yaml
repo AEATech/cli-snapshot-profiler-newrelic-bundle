@@ -4,19 +4,35 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-    AEATech\SnapshotProfilerNewrelic\:
-        resource: '%kernel.project_dir%/vendor/aeatech/snapshot-profiler-newrelic/src/AEATech/SnapshotProfilerNewrelic'
+    aea_tech_cli_snapshot_profiler_newrelic.filter:
+        class: AEATech\SnapshotProfilerNewrelic\Filter
 
-    AEATech\SnapshotProfiler\:
-        resource: '%kernel.project_dir%/vendor/aeatech/snapshot-profiler/src/AEATech/SnapshotProfiler'
+    aea_tech_cli_snapshot_profiler_newrelic.saver:
+        class: AEATech\SnapshotProfilerNewrelic\Saver
 
-    AEATech\CLISnapshotProfilerEventSubscriber\:
-        resource: '%kernel.project_dir%/vendor/aeatech/cli-snapshot-profiler-event-subscriber/src/AEATech/CLISnapshotProfilerEventSubscriber'
+    aea_tech_cli_snapshot_profiler_newrelic.adapter:
+        class: AEATech\SnapshotProfilerNewrelic\Adapter
+        arguments:
+            $appName: ''
+            $license: ''
 
-    AEATech\SnapshotProfilerContracts\ProfilerInterface: '@AEATech\SnapshotProfiler\Profiler'
-    AEATech\SnapshotProfilerContracts\FilterInterface: '@AEATech\SnapshotProfilerNewrelic\Filter'
-    AEATech\SnapshotProfilerContracts\SaverInterface: '@AEATech\SnapshotProfilerNewrelic\Saver'
-    AEATech\SnapshotProfilerContracts\AdapterInterface: '@AEATech\SnapshotProfilerNewrelic\Adapter'
+    aea_tech_cli_snapshot_profiler_newrelic.profiler:
+        class: AEATech\SnapshotProfiler\Profiler
+        arguments:
+            $adapter: '@aea_tech_cli_snapshot_profiler_newrelic.adapter'
 
-    AEATech\CLISnapshotProfilerNewrelicBundle\:
-        resource: '../src'
+    aea_tech_cli_snapshot_profiler_newrelic.event_matcher.all:
+        class: AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\AllEventMatcher
+        
+    aea_tech_cli_snapshot_profiler_newrelic.event_matcher.command:
+        class: AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\CommandEventMatcher
+        
+    AEATech\CLISnapshotProfilerNewrelicBundle\OptionsFactory: ~
+    
+    aea_tech_cli_snapshot_profiler_newrelic.event_subscriber:
+        class: AEATech\CLISnapshotProfilerEventSubscriber\EventSubscriber
+        arguments:
+            $optionsFactory: '@AEATech\CLISnapshotProfilerNewrelicBundle\OptionsFactory'
+            $profiler: '@aea_tech_cli_snapshot_profiler_newrelic.profiler'
+            $filter: '@aea_tech_cli_snapshot_profiler_newrelic.filter'
+            $saver: '@aea_tech_cli_snapshot_profiler_newrelic.saver'

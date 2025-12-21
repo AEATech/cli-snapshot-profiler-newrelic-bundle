@@ -3,11 +3,6 @@ declare(strict_types=1);
 
 namespace AEATech\CLISnapshotProfilerNewrelicBundle;
 
-use AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\AllEventMatcher;
-use AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\CommandEventMatcher;
-use AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\EventMatcherInterface;
-use AEATech\CLISnapshotProfilerEventSubscriber\EventSubscriber;
-use AEATech\SnapshotProfilerNewrelic\Adapter;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -29,6 +24,14 @@ class AEATechCLISnapshotProfilerNewrelicBundle extends AbstractBundle
 
     public const CONFIG_KEY_COMMAND = 'command';
     public const CONFIG_KEY_NAME_LIST = 'name_list';
+
+    public const SERVICE_NAME_ADAPTER = self::BUNDLE_NAME_PREFIX . 'adapter';
+    public const SERVICE_NAME_ALL_EVENT_MATCHER = self::EVENT_MATCHER_PREFIX . 'all';
+    public const SERVICE_NAME_COMMAND_EVENT_MATCHER =  self::EVENT_MATCHER_PREFIX . 'command';
+    public const SERVICE_NAME_EVENT_SUBSCRIBER = self::BUNDLE_NAME_PREFIX . 'event_subscriber';
+
+    private const BUNDLE_NAME_PREFIX = 'aea_tech_cli_snapshot_profiler_newrelic.';
+    private const EVENT_MATCHER_PREFIX = self::BUNDLE_NAME_PREFIX . 'event_matcher.';
 
     public function configure(DefinitionConfigurator $definition): void
     {
@@ -81,16 +84,14 @@ class AEATechCLISnapshotProfilerNewrelicBundle extends AbstractBundle
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        if ($config[self::CONFIG_KEY_IS_PROFILING_ENABLED]) {
-            $path = $this->getPath();
+        $path = $this->getPath();
 
-            $container->import($path . '/config/services.yaml');
+        $container->import($path . '/config/services.yaml');
 
-            $services = $container->services();
+        $services = $container->services();
 
-            $this->initAdapter($config, $services);
-            $this->initEventMatcher($config, $services);
-        }
+        $this->initAdapter($config, $services);
+        $this->initEventMatcher($config, $services, $builder);
     }
 
     /**
@@ -103,7 +104,7 @@ class AEATechCLISnapshotProfilerNewrelicBundle extends AbstractBundle
     {
         $newrelic = $config[self::CONFIG_KEY_NEWRELIC];
 
-        $services->get(Adapter::class)
+        $services->get(self::SERVICE_NAME_ADAPTER)
             ->arg('$appName', $newrelic[self::CONFIG_KEY_NEWRELIC_APP_NAME])
             ->arg('$license', $newrelic[self::CONFIG_KEY_NEWRELIC_LICENSE]);
     }
@@ -111,23 +112,35 @@ class AEATechCLISnapshotProfilerNewrelicBundle extends AbstractBundle
     /**
      * @param array $config
      * @param ServicesConfigurator $services
+     * @param ContainerBuilder $builder
      *
      * @return void
      */
-    private function initEventMatcher(array $config, ServicesConfigurator $services): void
+    private function initEventMatcher(array $config, ServicesConfigurator $services, ContainerBuilder $builder): void
     {
-        $eventMatcherConfig = $config[self::CONFIG_KEY_EVENT_MATCHER];
-        if ($eventMatcherConfig[self::CONFIG_KEY_IS_PROFILE_ALL_COMMANDS]) {
-            $services->alias(EventMatcherInterface::class, AllEventMatcher::class);
-        } elseif ($eventMatcherConfig[self::CONFIG_KEY_COMMAND][self::CONFIG_KEY_IS_ENABLED]) {
-            $eventMatcher = $services->get(CommandEventMatcher::class);
-            $eventMatcher->arg(
-                '$commandNameList',
-                $eventMatcherConfig[self::CONFIG_KEY_COMMAND][self::CONFIG_KEY_NAME_LIST]
-            );
-            $services->alias(EventMatcherInterface::class, CommandEventMatcher::class);
+        if ($config[self::CONFIG_KEY_IS_PROFILING_ENABLED]) {
+            $eventMatcherConfig = $config[self::CONFIG_KEY_EVENT_MATCHER];
+            if ($eventMatcherConfig[self::CONFIG_KEY_IS_PROFILE_ALL_COMMANDS]) {
+                $eventMatcherDefinition = $builder->getDefinition(self::SERVICE_NAME_ALL_EVENT_MATCHER);
+
+                $services->get(self::SERVICE_NAME_EVENT_SUBSCRIBER)
+                    ->arg('$eventMatcher', $eventMatcherDefinition);
+            } elseif ($eventMatcherConfig[self::CONFIG_KEY_COMMAND][self::CONFIG_KEY_IS_ENABLED]) {
+                $eventMatcher = $services->get(self::SERVICE_NAME_COMMAND_EVENT_MATCHER);
+                $eventMatcher->arg(
+                    '$commandNameList',
+                    $eventMatcherConfig[self::CONFIG_KEY_COMMAND][self::CONFIG_KEY_NAME_LIST]
+                );
+
+                $eventMatcherDefinition = $builder->getDefinition(self::SERVICE_NAME_COMMAND_EVENT_MATCHER);
+
+                $services->get(self::SERVICE_NAME_EVENT_SUBSCRIBER)
+                    ->arg('$eventMatcher', $eventMatcherDefinition);
+            } else {
+                $services->remove(self::SERVICE_NAME_EVENT_SUBSCRIBER);
+            }
         } else {
-            $services->remove(EventSubscriber::class);
+            $services->remove(self::SERVICE_NAME_EVENT_SUBSCRIBER);
         }
     }
 }

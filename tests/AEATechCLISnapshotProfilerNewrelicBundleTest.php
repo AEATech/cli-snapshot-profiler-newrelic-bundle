@@ -6,9 +6,9 @@ namespace AEATech\Tests;
 use AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\AllEventMatcher;
 use AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\CommandEventMatcher;
 use AEATech\CLISnapshotProfilerEventSubscriber\EventMatcher\EventMatcherInterface;
-use AEATech\CLISnapshotProfilerEventSubscriber\EventSubscriber;
 use AEATech\CLISnapshotProfilerNewrelicBundle\AEATechCLISnapshotProfilerNewrelicBundle;
 use Nyholm\BundleTest\TestKernel;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use ReflectionProperty;
@@ -42,33 +42,36 @@ class AEATechCLISnapshotProfilerNewrelicBundleTest extends KernelTestCase
     }
 
     /**
-     * @return void
+     * @return array
      */
-    #[Test]
-    public function checkDisabledState(): void
+    public static function checkDisabledStateDataProvider(): array
     {
-        self::bootKernel(['config' => static function (TestKernel $kernel): void {
-            $kernel->addTestConfig(__DIR__ . '/Fixtures/Resources/disabled.yaml');
-        }]);
-
-        $container = self::getContainer();
-
-        self::assertFalse($container->has(EventSubscriber::class));
+        return [
+            'check disabled state' => [
+                'config' => __DIR__ . '/Fixtures/Resources/disabled.yaml',
+            ],
+            'check enabled without event matcher state' => [
+                'config' => __DIR__ . '/Fixtures/Resources/enabled_without_event_matcher.yaml',
+            ],
+        ];
     }
 
     /**
+     * @param string $config
+     *
      * @return void
      */
     #[Test]
-    public function checkEnabledWithoutEventMatcher(): void
+    #[DataProvider('checkDisabledStateDataProvider')]
+    public function checkDisabledState(string $config): void
     {
-        self::bootKernel(['config' => static function (TestKernel $kernel): void {
-            $kernel->addTestConfig(__DIR__ . '/Fixtures/Resources/enabled_without_event_matcher.yaml');
+        self::bootKernel(['config' => static function (TestKernel $kernel) use ($config): void {
+            $kernel->addTestConfig($config);
         }]);
 
         $container = self::getContainer();
 
-        self::assertFalse($container->has(EventSubscriber::class));
+        self::assertFalse($container->has(AEATechCLISnapshotProfilerNewrelicBundle::SERVICE_NAME_EVENT_SUBSCRIBER));
     }
 
     /**
@@ -131,7 +134,7 @@ class AEATechCLISnapshotProfilerNewrelicBundleTest extends KernelTestCase
      */
     private function getEventMatcher(ContainerInterface $container): EventMatcherInterface
     {
-        $eventSubscriber = $container->get(EventSubscriber::class);
+        $eventSubscriber = $container->get(AEATechCLISnapshotProfilerNewrelicBundle::SERVICE_NAME_EVENT_SUBSCRIBER);
         $reflectionProperty = new ReflectionProperty($eventSubscriber, 'eventMatcher');
         $reflectionProperty->setAccessible(true);
 
