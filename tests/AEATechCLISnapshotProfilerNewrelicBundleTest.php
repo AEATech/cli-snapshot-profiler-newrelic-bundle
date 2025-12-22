@@ -136,7 +136,6 @@ class AEATechCLISnapshotProfilerNewrelicBundleTest extends KernelTestCase
     {
         $eventSubscriber = $container->get(AEATechCLISnapshotProfilerNewrelicBundle::SERVICE_NAME_EVENT_SUBSCRIBER);
         $reflectionProperty = new ReflectionProperty($eventSubscriber, 'eventMatcher');
-        $reflectionProperty->setAccessible(true);
 
         return $reflectionProperty->getValue($eventSubscriber);
     }

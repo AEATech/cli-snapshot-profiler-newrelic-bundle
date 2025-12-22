@@ -4,7 +4,7 @@
          beStrictAboutTestsThatDoNotTestAnything="false"
          cacheResult="false"
          bootstrap="tests/bootstrap.php"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.0/phpunit.xsd">
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd">
     <source>
         <include>
             <directory suffix=".php">src</directory>
